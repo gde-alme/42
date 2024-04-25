@@ -1,0 +1,38 @@
+
+events {
+  worker_connections  4096;  ## Default: 1024
+}
+
+http {
+	server {
+		default_type  application/octet-stream;
+    		include /etc/nginx/mime.types;
+
+		listen 443 ssl;
+		listen [::]:433 ssl;
+
+		server_name ${SERVER_NAME} www.${SERVER_NAME}
+
+		charset utf-8;
+
+		root    /var/www/wordpress;
+
+		index index.php;
+
+		ssl_certificate     /etc/nginx/ssl/${SERVER_NAME}.crt;
+		ssl_certificate_key /etc/nginx/ssl/${SERVER_NAME}.key;
+
+		ssl_protocols	TLSv1.2 TLSv1.3;
+
+		ssl_session_timeout	10m;
+		keepalive_timeout	70;
+
+		location ~ \.php$ { 
+			fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            		fastcgi_pass wordpress:9000;
+            		include fastcgi_params;
+            		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+			fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        	}
+	}
+}
